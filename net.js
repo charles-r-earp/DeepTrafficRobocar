@@ -15,8 +15,8 @@ var network_size = num_inputs * temporal_window + num_actions * temporal_window 
 var layer_defs = [];
 layer_defs.push({
     type: 'input',
-    out_sx: 1,
-    out_sy: 1,
+    out_sx: lanesSide * 2 + 1,
+    out_sy: patchesAhead + patchesBehind,
     out_depth: network_size
 });
 layer_defs.push({
