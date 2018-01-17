@@ -20,6 +20,13 @@ layer_defs.push({
     out_depth: temporal_window
 });
 layer_defs.push({
+    type: 'conv',
+    sx: 1,
+    sy: 3,
+    stride: 1,
+    pad: 1
+});
+layer_defs.push({
     type: 'fc',
     num_neurons: num_actions
 });
