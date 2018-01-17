@@ -2,32 +2,35 @@
 //<![CDATA[
 
 // a few things don't have var in front of them - they update already existing variables the game needs
-lanesSide = 3;
-patchesAhead = 50;
-patchesBehind = 10;
-trainIterations = 300000;
+lanesSide = 1;
+patchesAhead = 6;
+patchesBehind = 4;
+trainIterations = 5000;
 
-var num_inputs = (lanesSide * 2 + 1) * (patchesAhead + patchesBehind);
+// the number of other autonomous vehicles controlled by your network
+otherAgents = 0; // max of 9
+
+var width = lanesSide * 2 + 1;
+var height = patchesAhead + patchesBehind;
+var num_inputs = width * height;
 var num_actions = 5;
 var temporal_window = 0;
-var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
+//var network_size = num_inputs;
 
 var layer_defs = [];
-layer_defs.push({
+    layer_defs.push({
     type: 'input',
-    out_sx: 1,
-    out_sy: 1,
-    out_depth: network_size
+    out_sx: width,
+    out_sy: height,
+    out_depth: 1
 });
 layer_defs.push({
-    type: 'fc',
-    num_neurons: 300,
-    activation: 'tanh'
-});
-layer_defs.push({
-    type: 'fc',
-    num_neurons: 400,
-    activation: 'tanh'
+    type: 'conv',
+    sx: 3,
+    sy: 3,
+    stride: 1,
+    filters: 3,
+    activation: 'relu'
 });
 layer_defs.push({
     type: 'regression',
@@ -35,34 +38,34 @@ layer_defs.push({
 });
 
 var tdtrainer_options = {
-    learning_rate: 0.001,
+    learning_rate: 0.01,
     momentum: 0.0,
-    batch_size: 128,
+    batch_size: 64,
     l2_decay: 0.01
 };
 
 var opt = {};
 opt.temporal_window = temporal_window;
-opt.experience_size = 40000;
-opt.start_learn_threshold = 10000;
-opt.gamma = 0.97;
+opt.experience_size = 3000;
+opt.start_learn_threshold = 500;
+opt.gamma = 0.7;
 opt.learning_steps_total = 10000;
 opt.learning_steps_burnin = 1000;
-opt.epsilon_min = 0.0;
+opt.epsilon_min = 0.1;
 opt.epsilon_test_time = 0.0;
-opt.layer_defas = layer_defs;
+opt.layer_defs = layer_defs;
 opt.tdtrainer_options = tdtrainer_options;
 
 brain = new deepqlearn.Brain(num_inputs, num_actions, opt);
 
 learn = function (state, lastReward) {
-    brain.backward(lastReward);
-    var action = brain.forward(state);
+brain.backward(lastReward);
+var action = brain.forward(state);
 
-    draw_net();
-    draw_stats();
+draw_net();
+draw_stats();
 
-    return action;
+return action;
 }
 
 //]]>
