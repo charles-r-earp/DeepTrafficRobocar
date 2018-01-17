@@ -31,11 +31,6 @@ layer_defs.push({
     activation: 'relu'
 });
 layer_defs.push({
-    type: 'fc',
-    num_neurons: input_size / 8,
-    activation: 'relu'
-});
-layer_defs.push({
     type: 'regression',
     num_neurons: num_actions
 });
