@@ -20,13 +20,6 @@ layer_defs.push({
     out_depth: temporal_window
 });
 layer_defs.push({
-    type: 'conv',
-    sx: 1,
-    sy: 3,
-    stride: 1,
-    activation: 'relu'
-});
-layer_defs.push({
     type: 'regression',
     num_neurons: num_actions
 });
