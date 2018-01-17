@@ -5,7 +5,7 @@
 lanesSide = 2;
 patchesAhead = 10;
 patchesBehind = 4;
-trainIterations = 15000;
+trainIterations = 1000;
 
 var num_inputs = (lanesSide * 2 + 1) * (patchesAhead + patchesBehind);
 var num_actions = 5;
