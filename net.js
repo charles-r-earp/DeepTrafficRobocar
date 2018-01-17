@@ -10,19 +10,14 @@ trainIterations = 1000;
 var num_inputs = (lanesSide * 2 + 1) * (patchesAhead + patchesBehind);
 var num_actions = 5;
 var temporal_window = 1;
-var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
+//var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
 
 var layer_defs = [];
 layer_defs.push({
     type: 'input',
     out_sx: lanesSide * 2 + 1,
     out_sy: patchesAhead + patchesBehind,
-    out_depth: network_size
-});
-layer_defs.push({
-    type: 'fc',
-    num_neurons: num_inputs,
-    activation: 'relu'
+    out_depth: temporal_window
 });
 layer_defs.push({
     type: 'conv',
