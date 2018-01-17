@@ -3,13 +3,13 @@
 
 // a few things don't have var in front of them - they update already existing variables the game needs
 lanesSide = 2;
-patchesAhead = 6;
+patchesAhead = 10;
 patchesBehind = 4;
 trainIterations = 15000;
 
 var num_inputs = (lanesSide * 2 + 1) * (patchesAhead + patchesBehind);
 var num_actions = 5;
-var temporal_window = 2;
+var temporal_window = 10;
 var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
 
 var layer_defs = [];
@@ -21,17 +21,7 @@ layer_defs.push({
 });
 layer_defs.push({
     type: 'fc',
-    num_neurons: 50,
-    activation: 'relu'
-});
-layer_defs.push({
-    type: 'fc',
-    num_neurons: 25,
-    activation: 'relu'
-});
-layer_defs.push({
-    type: 'fc',
-    num_neurons: 12,
+    num_neurons: num_inputs,
     activation: 'relu'
 });
 layer_defs.push({
@@ -54,7 +44,7 @@ opt.gamma = 0.8;
 opt.learning_steps_total = 10000;
 opt.learning_steps_burnin = 1000;
 opt.epsilon_min = 0.08;
-opt.epsilon_test_time = 0.01;
+opt.epsilon_test_time = 0.0;
 opt.layer_defs = layer_defs;
 opt.tdtrainer_options = tdtrainer_options;
 
