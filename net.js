@@ -17,17 +17,18 @@ var num_actions = 5;
 var temporal_window = 0;
 
 var layer_defs = [];
-    layer_defs.push({
+layer_defs.push({
     type: 'input',
     out_sx: width,
     out_sy: height,
     out_depth: 1
 });
 layer_defs.push({
-    type: 'fc',
-    num_neurons: num_inputs/2,
-    group_size: 8,
-    activation: 'maxout'
+    type: 'conv',
+    sx: 3,
+    stride: 1,
+    filters: 32,
+    activation: 'relu'
 });
 layer_defs.push({
     type: 'regression',
@@ -48,7 +49,7 @@ opt.start_learn_threshold = 500;
 opt.gamma = 0.7;
 opt.learning_steps_total = 10000;
 opt.learning_steps_burnin = 1000;
-opt.epsilon_min = 0.1;
+opt.epsilon_min = 0.8;
 opt.epsilon_test_time = 0.0;
 opt.layer_defs = layer_defs;
 opt.tdtrainer_options = tdtrainer_options;
