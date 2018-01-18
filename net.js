@@ -24,6 +24,11 @@ var layer_defs = [];
     out_depth: 1
 });
 layer_defs.push({
+    type: 'fc',
+    num_neurons: num_inputs*2,
+    activation: 'relu'
+});
+layer_defs.push({
     type: 'regression',
     num_neurons: num_actions
 });
