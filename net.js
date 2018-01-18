@@ -2,9 +2,9 @@
 //<![CDATA[
 
 // a few things don't have var in front of them - they update already existing variables the game needs
-lanesSide = 3;
-patchesAhead = 16;
-patchesBehind = 8;
+lanesSide = 2;
+patchesAhead = 12;
+patchesBehind = 6;
 trainIterations = 5000;
 
 // the number of other autonomous vehicles controlled by your network
@@ -22,12 +22,6 @@ var layer_defs = [];
     out_sx: width,
     out_sy: height,
     out_depth: 1
-});
-layer_defs.push({
-    type: 'fc',
-    num_neurons: num_inputs/2,
-    group_size: 8,
-    activation: 'maxout'
 });
 layer_defs.push({
     type: 'regression',
