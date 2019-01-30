@@ -2,10 +2,10 @@
 //<![CDATA[
 
 // a few things don't have var in front of them - they update already existing variables the game needs
-lanesSide = 1;//8;
-patchesAhead = 8;//52;
-patchesBehind = 8;//18;
-trainIterations = 10000;
+lanesSide = 8;
+patchesAhead = 52;
+patchesBehind = 18;
+trainIterations = 40000;
 
 // the number of other autonomous vehicles controlled by your network
 otherAgents = 0; // max of 10
@@ -23,14 +23,6 @@ layer_defs.push({
     out_sx: width,
     out_sy: height,
     out_depth: 1
-});
-layer_defs.push({
-    type: 'conv',
-    sx: 2,
-    sy: 2,
-    pad: 0,
-    filters: 16,
-    activation: 'relu'
 });
 layer_defs.push({
     type: 'regression',
@@ -60,7 +52,7 @@ brain = new deepqlearn.Brain(num_inputs, num_actions, opt);
 
 occupied = function(state) {
     for (i = 0; i<num_inputs; ++i) {
-        state[i] = state[i] == 1 ? 0 : 1;
+        state[i] = state[i] == 1 ? 1 : -1;
     }
     return state;
 }
