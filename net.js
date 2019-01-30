@@ -10,17 +10,27 @@ trainIterations = 10000;
 // the number of other autonomous vehicles controlled by your network
 otherAgents = 0; // max of 10
 
+var width = lanesSide * 2 + 1;
+var height = patchesAhead + patchesBehind;
 var num_inputs = (lanesSide * 2 + 1) * (patchesAhead + patchesBehind);
 var num_actions = 5;
 var temporal_window = 0;
-var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
+//var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
 
 var layer_defs = [];
 layer_defs.push({
     type: 'input',
-    out_sx: 1,
-    out_sy: 1,
-    out_depth: network_size
+    out_sx: width,
+    out_sy: height,
+    out_depth: 1
+});
+layer_defs.push({
+    type: 'conv',
+    sx: 2,
+    sy: 2,
+    pad: 0,
+    filters: 16,
+    activation: 'relu'
 });
 layer_defs.push({
     type: 'regression',
@@ -48,8 +58,16 @@ opt.tdtrainer_options = tdtrainer_options;
 
 brain = new deepqlearn.Brain(num_inputs, num_actions, opt);
 
+occupied = function(state) {
+    for (i = 0; i<num_inputs; ++i) {
+        state[i] = state[i] == 1 ? 0 : 1;
+    }
+    return state;
+}
+
 learn = function (state, lastReward) {
     brain.backward(lastReward);
+    state = occupied(state);
     var action = brain.forward(state);
 
     draw_net();
