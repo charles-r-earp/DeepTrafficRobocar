@@ -2,9 +2,9 @@
 //<![CDATA[
 
 // a few things don't have var in front of them - they update already existing variables the game needs
-lanesSide = 8;
-patchesAhead = 52;
-patchesBehind = 18;
+lanesSide = 1;//8;
+patchesAhead = 8;//52;
+patchesBehind = 8;//18;
 trainIterations = 10000;
 
 // the number of other autonomous vehicles controlled by your network
@@ -23,26 +23,6 @@ layer_defs.push({
     out_depth: network_size
 });
 layer_defs.push({
-    type: 'fc',
-    num_neurons: 500,
-    activation: 'relu'
-});
-layer_defs.push({
-    type: 'fc',
-    num_neurons: 256,
-    activation: 'relu'
-});
-layer_defs.push({
-    type: 'fc',
-    num_neurons: 128,
-    activation: 'relu'
-});
-layer_defs.push({
-    type: 'fc',
-    num_neurons: 64,
-    activation: 'relu'
-});
-layer_defs.push({
     type: 'regression',
     num_neurons: num_actions
 });
@@ -59,7 +39,7 @@ opt.temporal_window = temporal_window;
 opt.experience_size = 3000;
 opt.start_learn_threshold = 500;
 opt.gamma = 0.7;
-opt.learning_steps_total = 10000;
+opt.learning_steps_total = trainIterations;
 opt.learning_steps_burnin = 1000;
 opt.epsilon_min = 0.0;
 opt.epsilon_test_time = 0.0;
