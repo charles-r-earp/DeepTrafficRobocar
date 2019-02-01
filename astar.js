@@ -87,9 +87,10 @@ class Node {
         this.action = action;
         this.heuristic = pos[1];
         this.cost = this.heuristic + depth;
+        this.depth = depth;
     }
     next(pos, action) {
-        return Node(pos, this.depth ? this.action : action, this.depth + 1);
+        return new Node(pos, this.depth ? this.action : action, this.depth + 1);
     }
 }
         
@@ -97,7 +98,7 @@ astar_search = function(map, start) {
   //var queue = new PriorityQueue((a, b) => a.cost < b.cost);
   //queue.push(new Node(start));
   var queue = [new Node(start)];
-  while (1) {
+  while (queue.length) {
       var node = queue.pop();
       if (node.pos[1] == 3) {
           return node.action;
@@ -113,7 +114,6 @@ astar_search = function(map, start) {
           }
           if (clear) {
             map.set(up[0], up[1], 0, 1);
-            //return 1;
             queue.push(node.next(up, 1));
           }
       }
@@ -128,7 +128,6 @@ astar_search = function(map, start) {
           }
           if (clear) {
               map.set(left[0], left[1], 0, 1);
-              //return 3;
               queue.push(node.next(left, 3));
           }
       }
@@ -143,11 +142,9 @@ astar_search = function(map, start) {
           }
           if (clear) {
               map.set(right[0], right[1], 0, 1);
-              //return 4;
               queue.push(node.next(right, 4));
           }
       }
-      return 4;
   }
   return 0;
 }
