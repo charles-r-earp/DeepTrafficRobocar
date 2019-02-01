@@ -2,9 +2,9 @@
 //<![CDATA[
 
 // a few things don't have var in front of them - they update already existing variables the game needs
-lanesSide = 1;
-patchesAhead = 8;
-patchesBehind = 8;
+lanesSide = 6;
+patchesAhead = 52;
+patchesBehind = 20;
 
 // the number of other autonomous vehicles controlled by your network
 otherAgents = 0; // max of 10
@@ -117,6 +117,20 @@ astar_search = function(map, start) {
             queue.push(node.next(up, 1));
           }
       }
+      if (node.pos[1] < map.sy-4) {
+          var down = [node.pos[0], node.pos[1]-1];
+          var clear = 1;
+          for (i = 0; i<5; ++i) {
+            if (map.get(up[0], up[1]+i, 0)) {
+              clear = 0;
+              break;
+            }
+          }
+          if (clear) {
+            map.set(down[0], down[1], 0, 1);
+            queue.push(node.next(down, 1));
+          }
+      }
       if (node.pos[0] > 0) {
           var left = [node.pos[0]-1, node.pos[1]];
           var clear = 1;
@@ -131,7 +145,7 @@ astar_search = function(map, start) {
               queue.push(node.next(left, 3));
           }
       }
-      if (node.pos[0] > 0) {
+      if (node.pos[0] < map.sx) {
           var right = [node.pos[0]+1, node.pos[1]];
           var clear = 1;
           for (i = -6; i<4; ++i) {
