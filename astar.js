@@ -16,71 +16,6 @@ var num_actions = 5;
 var temporal_window = 0;
 //var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
 
-//https://stackoverflow.com/questions/42919469/efficient-way-to-implement-priority-queue-in-javascript
-/*class PriorityQueue {
-  constructor(comparator = (a, b) => a > b) {
-    this._heap = [];
-    this._comparator = comparator;
-  }
-  size() {
-    return this._heap.length;
-  }
-  isEmpty() {
-    return this.size() == 0;
-  }
-  peek() {
-    return this._heap[top];
-  }
-  push(...values) {
-    values.forEach(value => {
-      this._heap.push(value);
-      this._siftUp();
-    });
-    return this.size();
-  }
-  pop() {
-    const poppedValue = this.peek();
-    const bottom = this.size() - 1;
-    if (bottom > top) {
-      this._swap(top, bottom);
-    }
-    this._heap.pop();
-    this._siftDown();
-    return poppedValue;
-  }
-  replace(value) {
-    const replacedValue = this.peek();
-    this._heap[top] = value;
-    this._siftDown();
-    return replacedValue;
-  }
-  _greater(i, j) {
-    return this._comparator(this._heap[i], this._heap[j]);
-  }
-  _swap(i, j) {
-    [this._heap[i], this._heap[j]] = [this._heap[j], this._heap[i]];
-  }
-  _siftUp() {
-    let node = this.size() - 1;
-    while (node > top && this._greater(node, parent(node))) {
-      this._swap(node, parent(node));
-      node = parent(node);
-    }
-  }
-  _siftDown() {
-    let node = top;
-    while (
-      (left(node) < this.size() && this._greater(left(node), node)) ||
-      (right(node) < this.size() && this._greater(right(node), node))
-    ) {
-      let maxChild = (right(node) < this.size() && this._greater(right(node), left(node))) ? right(node) : left(node);
-      this._swap(node, maxChild);
-      node = maxChild;
-    }
-  }
-}*/
-//
-
 class Node {
     constructor(pos, action = 0, depth = 0) {
         this.pos = pos;
@@ -163,7 +98,42 @@ astar_search = function(map, start) {
   return 0;
 }
 
+var layer_defs = [];
+layer_defs.push({
+    type: 'input',
+    out_sx: width,
+    out_sy: height,
+    out_depth: 1
+});
+layer_defs.push({
+    type: 'regression',
+    num_neurons: num_actions
+});
+
+var tdtrainer_options = {
+    learning_rate: 0.001,
+    momentum: 0.0,
+    batch_size: 64,
+    l2_decay: 0.01
+};
+
+var opt = {};
+opt.temporal_window = temporal_window;
+opt.experience_size = 3000;
+opt.start_learn_threshold = 500;
+opt.gamma = 0.1;
+opt.learning_steps_total = trainIterations;
+opt.learning_steps_burnin = 1000;
+opt.epsilon_min = 0.0;
+opt.epsilon_test_time = 0.0;
+opt.layer_defs = layer_defs;
+opt.tdtrainer_options = tdtrainer_options;
+
+brain = new deepqlearn.Brain(num_inputs, num_actions, opt);
+
 learn = function (state, lastReward) {
+    brain.backward(lastReward);
+    brain.forward(state);
     var map = new convnetjs.Vol(width, height, 1, 0);
     for (i = 0; i<state.length; ++i) {
         map.w[i] = state[i] == 1 ? 0 : 1;
