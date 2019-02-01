@@ -22,7 +22,7 @@ class Node {
         this.pos = pos;
         this.action = action;
         this.heuristic = pos[1];
-        this.cost = this.heuristic + depth;
+        this.cost = depth;
         this.depth = depth;
     }
     next(pos, action) {
@@ -31,8 +31,8 @@ class Node {
 }
         
 astar_search = function(map, start) {
-  var queue = [new Node(start)];
-  var node;
+  var node = new Node(start);
+  var queue = [node];
   while (queue.length) {
       node = queue.pop();
       if (node.pos[1] == 3) {
@@ -94,6 +94,7 @@ astar_search = function(map, start) {
               queue.push(node.next(right, 4));
           }
       }
+      queue.sort(function (a,b){ return a.cost < b.cost; });
   }
   return node.action;
 }
