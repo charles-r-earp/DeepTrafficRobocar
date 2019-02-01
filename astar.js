@@ -2,9 +2,9 @@
 //<![CDATA[
 
 // a few things don't have var in front of them - they update already existing variables the game needs
-lanesSide = 0;
+lanesSide = 1;
 patchesAhead = 8;
-patchesBehind = 0;
+patchesBehind = 8;
 
 // the number of other autonomous vehicles controlled by your network
 otherAgents = 0; // max of 10
@@ -16,11 +16,16 @@ var num_actions = 5;
 var temporal_window = 0;
 //var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
 
-remap_occupied = function(state) {
-    for (i = 0; i<num_inputs; ++i) {
-        state[i] = state[i] == 1 ? 1 : 0;
+occupancy_map = function(map) {
+    var occmap = new convnetjs.Vol(map.sx, map.sy-4+1, 1, 0);
+    for (i = 0; i<occmap.sx; ++i) {
+        for (j = 0; j<occmap.sy; ++j) {
+            for (u = 0; u<4; ++u) {
+                occmap.set(i, j, 0, occmap.get(i, j, 0) + map.get(i, j+u, 0)) == 1 ? 1 : 0;
+            }
+        }
     }
-    return state;
+    return occmap;
 }
 
 //https://stackoverflow.com/questions/42919469/efficient-way-to-implement-priority-queue-in-javascript
@@ -100,35 +105,49 @@ class Node {
     }
 }
         
-
 astar_search = function(map, start) {
-  queue = new PriorityQueue((a, b) => a.cost < b.cost);
-  queue.push(Node(start));
-  while (!queue.isEmpty()) {
-      node = queue.pop();
-      if (node.pos[1] == 0) {
+  var queue = new PriorityQueue((a, b) => a.cost < b.cost);
+  queue.push(new Node(start));
+  while (1) {
+      //var node = queue.pop();
+      /*if (node.pos[1] == 0) {
           return node.action;
       }
       if (node.pos[1] > 0) {
-          up = [node.pos[0], node.pos[1]-1];
+          var up = [node.pos[0], node.pos[1]-1];
           if (!map.get(up[0], up[1], 0)) {
               map.set(up[0], up[1], 0, 1);
               queue.push(node.next(up, 1));
           }
       }
+      if (node.pos[0] > 0) {
+          var left = [node.pos[0]-1, node.pos[1]];
+          if (!map.get(left[0], left[1], 0)) {
+              map.set(left[0], left[1], 0, 1);
+              queue.push(node.next(left, 3));
+          }
+      }
+      if (node.pos[0] <= map.sx-1) {
+          var right = [node.pos[0]+1, node.pos[1]];
+          if (!map.get(right[0], right[1], 0)) {
+              map.set(right[0], right[1], 0, 1);
+              queue.push(node.next(right, 4));
+          }
+      }*/
+      return 4;
   }
-  return 0; 
+  return 0;
 }
 
 learn = function (state, lastReward) {
-    map = new convnetjs.Vol(width, height, 1, 0);
-    map.w = remap_occupied(state);
-    
+    var map = new convnetjs.Vol(width, height, 1, 0);
+    map.w = state;
+    map = occupancy_map(map);
     var action = astar_search(map, [lanesSide, patchesAhead]);
 
     draw_stats();
 
-    return 0;
+    return action;
 }
 
 //]]>
