@@ -2,9 +2,9 @@
 //<![CDATA[
 
 // a few things don't have var in front of them - they update already existing variables the game needs
-lanesSide = 8;
-patchesAhead = 52;
-patchesBehind = 18;
+lanesSide = 0;
+patchesAhead = 8;
+patchesBehind = 0;
 
 // the number of other autonomous vehicles controlled by your network
 otherAgents = 0; // max of 10
@@ -89,22 +89,36 @@ class PriorityQueue {
 //
 
 class Node {
-    constructor(pos) {
-        this.actions = [];
-        this.path = [pos];
+    constructor(pos, action = 0, depth = 0) {
+        this.pos = pos;
+        this.action = action;
         this.heuristic = pos[1];
-        this.cost = this.heuristic;
+        this.cost = this.heuristic + depth;
     }
-    next() {
-        pos = this.path[length - 1];
+    next(pos, action) {
+        return Node(pos, this.depth ? this.action : action, this.depth + 1);
+    }
+}
         
 
 astar_search = function(map, start) {
-  occupied = new convnetjs.Vol(width, height, 1);
-  occupied.w = state;
-  visited = new convnetjs.Vol(width, height, 1, 0);
   queue = new PriorityQueue((a, b) => a.cost < b.cost);
-  queue.push(
+  queue.push(Node(start));
+  while (!queue.isEmpty()) {
+      node = queue.pop();
+      if (node.pos[1] == 0) {
+          return node.action;
+      }
+      if (node.pos[1] > 0) {
+          up = [node.pos[0], node.pos[1]-1];
+          if (!map.get(up[0], up[1], 0)) {
+              map.set(up[0], up[1], 0, 1);
+              queue.push(node.next(up, 1));
+          }
+      }
+  }
+  return 0; 
+}
 
 learn = function (state, lastReward) {
     map = new convnetjs.Vol(width, height, 1, 0);
