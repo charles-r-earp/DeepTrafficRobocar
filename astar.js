@@ -5,9 +5,10 @@
 lanesSide = 6;
 patchesAhead = 52;
 patchesBehind = 20;
+trainIterations = 40000;
 
 // the number of other autonomous vehicles controlled by your network
-otherAgents = 0; // max of 10
+otherAgents = 10; // max of 10
 
 var width = lanesSide * 2 + 1;
 var height = patchesAhead + patchesBehind;
@@ -30,11 +31,10 @@ class Node {
 }
         
 astar_search = function(map, start) {
-  //var queue = new PriorityQueue((a, b) => a.cost < b.cost);
-  //queue.push(new Node(start));
   var queue = [new Node(start)];
+  var node;
   while (queue.length) {
-      var node = queue.pop();
+      node = queue.pop();
       if (node.pos[1] == 3) {
           return node.action;
       }
@@ -95,7 +95,7 @@ astar_search = function(map, start) {
           }
       }
   }
-  return 0;
+  return node.action;
 }
 
 var layer_defs = [];
@@ -120,10 +120,10 @@ var tdtrainer_options = {
 var opt = {};
 opt.temporal_window = temporal_window;
 opt.experience_size = 3000;
-opt.start_learn_threshold = 500;
-opt.gamma = 0.1;
+opt.start_learn_threshold = 0;
+opt.gamma = 0.98;
 opt.learning_steps_total = trainIterations;
-opt.learning_steps_burnin = 1000;
+opt.learning_steps_burnin = 0;
 opt.epsilon_min = 0.0;
 opt.epsilon_test_time = 0.0;
 opt.layer_defs = layer_defs;
@@ -132,8 +132,6 @@ opt.tdtrainer_options = tdtrainer_options;
 brain = new deepqlearn.Brain(num_inputs, num_actions, opt);
 
 learn = function (state, lastReward) {
-    brain.backward(lastReward);
-    brain.forward(state);
     var map = new convnetjs.Vol(width, height, 1, 0);
     for (i = 0; i<state.length; ++i) {
         map.w[i] = state[i] == 1 ? 0 : 1;
@@ -141,8 +139,11 @@ learn = function (state, lastReward) {
     for (i = 0; i<4; ++i) {
         map.set(lanesSide, patchesAhead-4+1, 1, 0);
     }
-    var action = astar_search(map, [lanesSide, patchesAhead]);
+    brain.backward(lastReward);
+    brain.forward(map.w);
+    action = astar_search(map, [lanesSide, patchesAhead]);
 
+    draw_net();
     draw_stats();
 
     return action;
