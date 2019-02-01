@@ -8,7 +8,7 @@ patchesBehind = 20;
 trainIterations = 40000;
 
 // the number of other autonomous vehicles controlled by your network
-otherAgents = 10; // max of 10
+otherAgents = 0; // max of 10
 
 var width = lanesSide * 2 + 1;
 var height = patchesAhead + patchesBehind;
