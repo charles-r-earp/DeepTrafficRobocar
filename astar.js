@@ -16,20 +16,8 @@ var num_actions = 5;
 var temporal_window = 0;
 //var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
 
-occupancy_map = function(map) {
-    var occmap = new convnetjs.Vol(map.sx, map.sy-4+1, 1, 0);
-    for (i = 0; i<occmap.sx; ++i) {
-        for (j = 0; j<occmap.sy; ++j) {
-            for (u = 0; u<4; ++u) {
-                occmap.set(i, j, 0, occmap.get(i, j, 0) + map.get(i, j+u, 0)) == 1 ? 1 : 0;
-            }
-        }
-    }
-    return occmap;
-}
-
 //https://stackoverflow.com/questions/42919469/efficient-way-to-implement-priority-queue-in-javascript
-class PriorityQueue {
+/*class PriorityQueue {
   constructor(comparator = (a, b) => a > b) {
     this._heap = [];
     this._comparator = comparator;
@@ -90,7 +78,7 @@ class PriorityQueue {
       node = maxChild;
     }
   }
-}
+}*/
 //
 
 class Node {
@@ -106,34 +94,59 @@ class Node {
 }
         
 astar_search = function(map, start) {
-  var queue = new PriorityQueue((a, b) => a.cost < b.cost);
-  queue.push(new Node(start));
+  //var queue = new PriorityQueue((a, b) => a.cost < b.cost);
+  //queue.push(new Node(start));
+  var queue = [new Node(start)];
   while (1) {
-      //var node = queue.pop();
-      /*if (node.pos[1] == 0) {
+      var node = queue.pop();
+      if (node.pos[1] == 3) {
           return node.action;
       }
       if (node.pos[1] > 0) {
           var up = [node.pos[0], node.pos[1]-1];
-          if (!map.get(up[0], up[1], 0)) {
-              map.set(up[0], up[1], 0, 1);
-              queue.push(node.next(up, 1));
+          var clear = 1;
+          for (i = -5; i<0; ++i) {
+            if (map.get(up[0], up[1]+i, 0)) {
+              clear = 0;
+              break;
+            }
+          }
+          if (clear) {
+            map.set(up[0], up[1], 0, 1);
+            //return 1;
+            queue.push(node.next(up, 1));
           }
       }
       if (node.pos[0] > 0) {
           var left = [node.pos[0]-1, node.pos[1]];
-          if (!map.get(left[0], left[1], 0)) {
+          var clear = 1;
+          for (i = -6; i<4; ++i) {
+              if (map.get(left[0], left[1]+i, 0)) {
+                  clear = 0;
+                  break;
+              }
+          }
+          if (clear) {
               map.set(left[0], left[1], 0, 1);
+              //return 3;
               queue.push(node.next(left, 3));
           }
       }
-      if (node.pos[0] <= map.sx-1) {
+      if (node.pos[0] > 0) {
           var right = [node.pos[0]+1, node.pos[1]];
-          if (!map.get(right[0], right[1], 0)) {
+          var clear = 1;
+          for (i = -6; i<4; ++i) {
+              if (map.get(right[0], right[1]+i, 0)) {
+                  clear = 0;
+                  break;
+              }
+          }
+          if (clear) {
               map.set(right[0], right[1], 0, 1);
+              //return 4;
               queue.push(node.next(right, 4));
           }
-      }*/
+      }
       return 4;
   }
   return 0;
@@ -141,8 +154,12 @@ astar_search = function(map, start) {
 
 learn = function (state, lastReward) {
     var map = new convnetjs.Vol(width, height, 1, 0);
-    map.w = state;
-    map = occupancy_map(map);
+    for (i = 0; i<state.length; ++i) {
+        map.w[i] = state[i] == 1 ? 0 : 1;
+    }
+    for (i = 0; i<4; ++i) {
+        map.set(lanesSide, patchesAhead-4+1, 1, 0);
+    }
     var action = astar_search(map, [lanesSide, patchesAhead]);
 
     draw_stats();
