@@ -56,7 +56,7 @@ astar_search = function(map, start) {
           var down = [node.pos[0], node.pos[1]-1];
           var clear = 1;
           for (i = 0; i<5; ++i) {
-            if (map.get(up[0], up[1]+i, 0)) {
+            if (map.get(down[0], down[1]+i, 0)) {
               clear = 0;
               break;
             }
