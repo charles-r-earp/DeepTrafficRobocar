@@ -94,7 +94,7 @@ astar_search = function(map, start) {
               queue.push(node.next(right, 4));
           }
       }
-      queue.sort(function (a,b){ return a.cost < b.cost; });
+      queue.sort(function (a,b){ return a.cost != b.cost ? a.cost < b.cost : a.action < b.action; });
   }
   return node.action;
 }
