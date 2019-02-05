@@ -17,7 +17,7 @@ var num_actions = 5;
 var temporal_window = 0;
 //var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
 
-class Node {
+/*class Node {
     constructor(pos, action, reward, depth = 0) {
         this.pos = pos;
         this.action = action;
@@ -27,11 +27,12 @@ class Node {
     next(pos, reward, action) {
         return new Node(pos, this.depth ? this.action : action, reward, this.depth + 1);
     }
-}
+}*/
 
-class Map {
-    constructor(shape, data = 0) {
-        this.shape = shape
+/*
+class Map2D {
+    constructor(shape, data) {
+        //this.shape = shape;
         if (data.constructor == Array) {
             this.data = data;
         }
@@ -43,19 +44,15 @@ class Map {
             }
         }
     }
-    
-    index(pos) {
+    /*index(pos) {
         return pos[0] * this.shape[1] + pos[1];
     }
-    
     get(pos) {
         return this.data[this.index(pos)];
     }
-    
     set(pos, val) {
         this.data[this.index(pos)] = val;
     }   
-    
     shift(delta, fill = 0) {
         var map = new Map(this.shape, fill);
         var from, to;
@@ -68,9 +65,10 @@ class Map {
                 }
             }
         }
+        return map;
     }
 }
-
+*/
 var layer_defs = [];
 layer_defs.push({
     type: 'input',
@@ -103,7 +101,7 @@ opt.layer_defs = layer_defs;
 opt.tdtrainer_options = tdtrainer_options;
 
 brain = new deepqlearn.Brain(num_inputs, num_actions, opt);
-
+/*
 astar_search = function(speeds, start) {
   var visited = new Map(speeds.shape, 0);
   var node = new Node(start);
@@ -114,6 +112,8 @@ astar_search = function(speeds, start) {
           continue;
       }
       visited.set(node.pos, 1);
+      continue;
+      
       // up
       if (node.pos[1] > 0) {
           var up = [node.pos[0], node.pos[1]-1];
@@ -127,7 +127,7 @@ astar_search = function(speeds, start) {
           if (clear) {
             var shiftSpeeds = speeds.shift([0, -1]);
             var action = 1;
-            var reward = brain.value_net.forward(shiftSpeeds)[action];
+            var reward = 0;// brain.value_net.forward(shiftSpeeds)[action];
             queue.push(node.next(up, action, reward));
           }
       }
@@ -143,7 +143,7 @@ astar_search = function(speeds, start) {
           if (clear) {
             var shiftSpeeds = speeds.shift([-1, 0]);
             var action = 3;
-            var reward = brain.value_net.forward(shiftSpeeds)[action];
+            var reward = 0;// brain.value_net.forward(shiftSpeeds)[action];
             queue.push(node.next(left, action, reward));
           }
       }
@@ -159,28 +159,30 @@ astar_search = function(speeds, start) {
           if (clear) {
             var shiftSpeeds = speeds.shift([1, 0]);
             var action = 4;
-            var reward = brain.value_net.forward(shiftSpeeds)[action];
+            var reward = 0;// brain.value_net.forward(shiftSpeeds)[action];
             queue.push(node.next(right, action, reward));
           }
       }
       queue.sort(function (a,b){ return a.reward > b.reward; });
   }
   return node.action;
-}
+  return 0;
+}*/
 
-var lastState = 0;
+//var lastState = 0;
 
 learn = function (state, lastReward) {
-    if (lastState) {
+    return 0;
+    /*if (lastState) {
         brain.forward(lastState);
         brain.backward(lastReward);
     }
-    lastState = state;
-    var speeds = new Map([width, height], state);
-    action = astar_search(speeds, [lanesSide, patchesAhead]);
-
-    draw_net();
-    draw_stats();
+    lastState = state;*/
+    //var speeds = [];//[width, height], state);
+    //var action = 0;// astar_search(speeds, [lanesSide, patchesAhead]);
+   // var action = 0;
+    //draw_net();
+    //draw_stats();
 
     return action;
 }
