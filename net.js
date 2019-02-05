@@ -31,9 +31,31 @@ class Node {
 
 class Map {
     constructor(shape, data = 0) {
-        if (data ) {
-            length = shape[0] * shape[1];
+        this.shape = shape
+        if (data.constructor -= Array) {
+            this.data = data;
         }
+        else {
+            this.data = [];
+            length = shape[0] * shape[1];
+            for (i = 0; i < length; ++i) {
+                this.data.push(data);
+            }
+        }
+    }
+    
+    index(pos) {
+        return pos[0] * this.shape[1] + pos[1];
+    }
+    
+    get(pos) {
+        return this.data[this.index(pos)];
+    }
+    
+    set(pos, val) {
+        this.data[this.index(pos)] = val;
+    }   
+}
         
 astar_search = function(map, start) {
   var node = new Node(start);
