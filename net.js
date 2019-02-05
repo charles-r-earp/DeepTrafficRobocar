@@ -32,7 +32,7 @@ class Node {
 class Map {
     constructor(shape, data = 0) {
         this.shape = shape
-        if (data.constructor -= Array) {
+        if (data.constructor == Array) {
             this.data = data;
         }
         else {
@@ -55,64 +55,21 @@ class Map {
     set(pos, val) {
         this.data[this.index(pos)] = val;
     }   
-}
-        
-astar_search = function(map, start) {
-  var node = new Node(start);
-  var queue = [node];
-  while (queue.length) {
-      node = queue.pop();
-      if (node.pos[1] == 3) {
-          return node.action;
-      }
-      if (node.pos[1] > 0) {
-          var up = [node.pos[0], node.pos[1]-1];
-          var clear = 1;
-          for (i = -5; i<0; ++i) {
-            if (map.get(up[0], up[1]+i, 0)) {
-              clear = 0;
-              break;
+    
+    shift(delta, fill = 0) {
+        var map = new Map(this.shape, fill);
+        var from, to;
+        for (i = 0; i < this.shape[0]; ++i) {
+            for (j = 0; j < this.shape[1]; ++j) {
+                from = [i, j] 
+                to = [i+delta[0], j+delta[1]];
+                if (to[0] >= 0 && to[0] < this.shape[0] && to[1] >= 0 && to[1] < this.shape[1]) {
+                    map.set(to, this.get(from));
+                }
             }
-          }
-          if (clear) {
-            map.set(up[0], up[1], 0, 1);
-            queue.push(node.next(up, 1));
-          }
-      }
-      if (node.pos[0] > 0) {
-          var left = [node.pos[0]-1, node.pos[1]];
-          var clear = 1;
-          for (i = -6; i<4; ++i) {
-              if (map.get(left[0], left[1]+i, 0)) {
-                  clear = 0;
-                  break;
-              }
-          }
-          if (clear) {
-              map.set(left[0], left[1], 0, 1);
-              queue.push(node.next(left, 3));
-          }
-      }
-      if (node.pos[0] < map.sx) {
-          var right = [node.pos[0]+1, node.pos[1]];
-          var clear = 1;
-          for (i = -6; i<4; ++i) {
-              if (map.get(right[0], right[1]+i, 0)) {
-                  clear = 0;
-                  break;
-              }
-          }
-          if (clear) {
-              map.set(right[0], right[1], 0, 1);
-              queue.push(node.next(right, 4));
-          }
-      }
-      queue.sort(function (a,b){ return a.cost != b.cost ? a.cost < b.cost : a.action < b.action; });
-  }
-  return node.action;
+        }
+    }
 }
-
-class Map
 
 var layer_defs = [];
 layer_defs.push({
@@ -147,17 +104,80 @@ opt.tdtrainer_options = tdtrainer_options;
 
 brain = new deepqlearn.Brain(num_inputs, num_actions, opt);
 
+astar_search = function(speeds, start) {
+  var visited = new Map(speeds.shape, 0);
+  var node = new Node(start);
+  var queue = [node];
+  while (queue.length) {
+      node = queue.pop();
+      if (visited.get(node.pos) || node.depth >= 4) {
+          continue;
+      }
+      visited.set(node.pos, 1);
+      // up
+      if (node.pos[1] > 0) {
+          var up = [node.pos[0], node.pos[1]-1];
+          var clear = 1;
+          for (i = -5; i<0; ++i) {
+            if (speeds.get(up) == 1) {
+              clear = 0;
+              break;
+            }
+          }
+          if (clear) {
+            var shiftSpeeds = speeds.shift([0, -1]);
+            var action = 1;
+            var reward = brain.value_net.forward(shiftSpeeds)[action];
+            queue.push(node.next(up, action, reward));
+          }
+      }
+      if (node.pos[0] > 0) {
+          var left = [node.pos[0]-1, node.pos[1]];
+          var clear = 1;
+          for (i = -6; i<4; ++i) {
+              if (speeds.get(left) == 1) {
+                  clear = 0;
+                  break;
+              }
+          }
+          if (clear) {
+            var shiftSpeeds = speeds.shift([-1, 0]);
+            var action = 3;
+            var reward = brain.value_net.forward(shiftSpeeds)[action];
+            queue.push(node.next(left, action, reward));
+          }
+      }
+      if (node.pos[0] < map.sx) {
+          var right = [node.pos[0]+1, node.pos[1]];
+          var clear = 1;
+          for (i = -6; i<4; ++i) {
+              if (speeds.get(right) == 1) {
+                  clear = 0;
+                  break;
+              }
+          }
+          if (clear) {
+            var shiftSpeeds = speeds.shift([1, 0]);
+            var action = 4;
+            var reward = brain.value_net.forward(shiftSpeeds)[action];
+            queue.push(node.next(right, action, reward));
+          }
+      }
+      queue.sort(function (a,b){ return a.reward > b.reward; });
+  }
+  return node.action;
+}
+
+var lastState = 0;
+
 learn = function (state, lastReward) {
-    var map = new convnetjs.Vol(width, height, 1, 0);
-    for (i = 0; i<state.length; ++i) {
-        map.w[i] = state[i] == 1 ? 0 : 1;
+    if (lastState) {
+        brain.forward(lastState);
+        brain.backward(lastReward);
     }
-    for (i = 0; i<4; ++i) {
-        map.set(lanesSide, patchesAhead-4+1, 1, 0);
-    }
-    brain.backward(lastReward);
-    brain.forward(map.w);
-    action = astar_search(map, [lanesSide, patchesAhead]);
+    lastState = state;
+    var speeds = new Map([width, height], state);
+    action = astar_search(speeds, [lanesSide, patchesAhead]);
 
     draw_net();
     draw_stats();
