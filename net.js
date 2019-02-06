@@ -13,12 +13,12 @@ otherAgents = 0; // max of 10
 var width = lanesSide * 2 + 1;
 var height = patchesAhead + patchesBehind;
 var num_inputs = (lanesSide * 2 + 1) * (patchesAhead + patchesBehind);
-var num_actions = 5;
+var num_actions = 2;
 var temporal_window = 0;
 //var network_size = num_inputs * temporal_window + num_actions * temporal_window + num_inputs;
 
 class Node {
-    constructor(pos, action, reward, depth = 0) {
+    constructor(pos, action = 0, reward = 0, depth = 0) {
         this.pos = pos;
         this.action = action;
         this.reward = reward;
@@ -95,7 +95,7 @@ opt.start_learn_threshold = 0;
 opt.gamma = 0.98;
 opt.learning_steps_total = trainIterations;
 opt.learning_steps_burnin = 0;
-opt.epsilon_min = 0.0;
+opt.epsilon_min = 0;
 opt.epsilon_test_time = 0.0;
 opt.layer_defs = layer_defs;
 opt.tdtrainer_options = tdtrainer_options;
@@ -104,20 +104,24 @@ brain = new deepqlearn.Brain(num_inputs, num_actions, opt);
 
 astar_search = function(speeds, start) {
   var visited = new Map(speeds.shape, 0);
-  var node = new Node(start);
+  var node = new Node(start, 4);
   var queue = [node];
   while (queue.length) {
       node = queue.pop();
-      if (visited.get(node.pos) || node.depth >= 4) {
+      if (visited.get(node.pos)) {
           continue;
+      }
+      if (node.depth >= 4) {
+          return 4;//node.action;
+          break;
       }
       visited.set(node.pos, 1);
       // up
-      if (node.pos[1] > 0) {
+      if (node.pos[1] > 0 && node.depth > 0) {
           var up = [node.pos[0], node.pos[1]-1];
           var clear = 1;
           for (var i = -5; i<0; ++i) {
-            if (speeds.get(up) == 1) {
+            if (speeds.get(up) != 1) {
               clear = 0;
               break;
             }
@@ -127,7 +131,7 @@ astar_search = function(speeds, start) {
             var v = new convnetjs.Vol(1, 1, shiftSpeeds.data.length);
             v.w = shiftSpeeds.data;
             var action = 1;
-            var reward = brain.value_net.forward(v)[action];
+            var reward = 0;//brain.value_net.forward(v)[action];
             queue.push(node.next(up, action, reward));
           }
       }
@@ -135,7 +139,7 @@ astar_search = function(speeds, start) {
           var left = [node.pos[0]-1, node.pos[1]];
           var clear = 1;
           for (var i = -6; i<4; ++i) {
-              if (speeds.get(left) == 1) {
+              if (speeds.get(left) != 1) {
                   clear = 0;
                   break;
               }
@@ -145,7 +149,7 @@ astar_search = function(speeds, start) {
             var v = new convnetjs.Vol(1, 1, shiftSpeeds.data.length);
             v.w = shiftSpeeds.data;
             var action = 3;
-            var reward = brain.value_net.forward(v)[action];
+            var reward = 0;//brain.value_net.forward(v)[action];
             queue.push(node.next(left, action, reward));
           }
       }
@@ -153,7 +157,7 @@ astar_search = function(speeds, start) {
           var right = [node.pos[0]+1, node.pos[1]];
           var clear = 1;
           for (var i = -6; i<4; ++i) {
-              if (speeds.get(right) == 1) {
+              if (speeds.get(right) != 1) {
                   clear = 0;
                   break;
               }
@@ -163,29 +167,32 @@ astar_search = function(speeds, start) {
             var v = new convnetjs.Vol(1, 1, shiftSpeeds.data.length);
             v.w = shiftSpeeds.data;
             var action = 4;
-            var reward = brain.value_net.forward(v)[action];
+            var reward = 0;//brain.value_net.forward(v)[action];
             queue.push(node.next(right, action, reward));
           }
       }
-      queue.sort(function (a,b){ return a.reward > b.reward; });   
+      queue.sort(function (a,b){ return a.pos[0] < b.pos[0]; });   
   }
-  return node.action;
+  return 3;
+ // return node.action;
 }
 
 var lastState = 0;
 
 learn = function (state, lastReward) {
-    if (lastState) {
+    /*if (lastState) {
         brain.forward(lastState);
         brain.backward(lastReward);
     }
-    lastState = state;
+    lastState = state;*/
+    /*
     var speeds = new Map([width, height], state);
-    var action = astar_search(speeds, [lanesSide, patchesAhead]);
+    var action = astar_search(speeds, [lanesSide, patchesAhead]);*/
+    var action = brain.forward(state);
     draw_net();
     draw_stats();
 
-    return action; 
+    return action ? 3 : 4;
 }
 
 //]]>
