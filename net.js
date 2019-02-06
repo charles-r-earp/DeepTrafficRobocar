@@ -72,9 +72,9 @@ class Map {
 var layer_defs = [];
 layer_defs.push({
     type: 'input',
-    out_sx: width,
-    out_sy: height,
-    out_depth: 1
+    out_sx: 1,
+    out_sy: 1,
+    out_depth: num_inputs
 });
 layer_defs.push({
     type: 'regression',
@@ -125,7 +125,7 @@ astar_search = function(speeds, start) {
           if (clear) {
             var shiftSpeeds = speeds.shift([0, -1]);
             var v = new convnetjs.Vol(1, 1, shiftSpeeds.data.length);
-            v.w = shiftSpeeds;
+            v.w = shiftSpeeds.data;
             var action = 1;
             var reward = brain.value_net.forward(v)[action];
             queue.push(node.next(up, action, reward));
@@ -142,8 +142,10 @@ astar_search = function(speeds, start) {
           }
           if (clear) {
             var shiftSpeeds = speeds.shift([-1, 0]);
+            var v = new convnetjs.Vol(1, 1, shiftSpeeds.data.length);
+            v.w = shiftSpeeds.data;
             var action = 3;
-            var reward = 0;//brain.value_net.forward(shiftSpeeds)[action];
+            var reward = brain.value_net.forward(v)[action];
             queue.push(node.next(left, action, reward));
           }
       }
@@ -158,8 +160,10 @@ astar_search = function(speeds, start) {
           }
           if (clear) {
             var shiftSpeeds = speeds.shift([1, 0]);
+            var v = new convnetjs.Vol(1, 1, shiftSpeeds.data.length);
+            v.w = shiftSpeeds.data;
             var action = 4;
-            var reward = 0;//brain.value_net.forward(shiftSpeeds)[action];
+            var reward = brain.value_net.forward(v)[action];
             queue.push(node.next(right, action, reward));
           }
       }
