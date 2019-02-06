@@ -124,8 +124,10 @@ astar_search = function(speeds, start) {
           }
           if (clear) {
             var shiftSpeeds = speeds.shift([0, -1]);
+            var v = new convnetjs.Vol(1, 1, shiftSpeeds.data.length);
+            v.w = shiftSpeeds;
             var action = 1;
-            var reward = 0;// brain.value_net.forward(shiftSpeeds)[action];
+            var reward = brain.value_net.forward(v)[action];
             queue.push(node.next(up, action, reward));
           }
       }
@@ -141,7 +143,7 @@ astar_search = function(speeds, start) {
           if (clear) {
             var shiftSpeeds = speeds.shift([-1, 0]);
             var action = 3;
-            var reward = 0;// brain.value_net.forward(shiftSpeeds)[action];
+            var reward = 0;//brain.value_net.forward(shiftSpeeds)[action];
             queue.push(node.next(left, action, reward));
           }
       }
@@ -157,7 +159,7 @@ astar_search = function(speeds, start) {
           if (clear) {
             var shiftSpeeds = speeds.shift([1, 0]);
             var action = 4;
-            var reward = 0;// brain.value_net.forward(shiftSpeeds)[action];
+            var reward = 0;//brain.value_net.forward(shiftSpeeds)[action];
             queue.push(node.next(right, action, reward));
           }
       }
